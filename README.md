@@ -2,7 +2,7 @@
 
 Biometric authentication system in Python (FaceID + Liveness Check + Anti-Spoofing + Encrypted Data).
 
-## 📌 About The Project
+##  About The Project
 
 This project is my practical work for mastering computer vision, biometrics, cybersecurity, and data encryption. 
 
@@ -12,7 +12,7 @@ The code is completely Open Source and free. Feel free to use, inspect, modify, 
 
 ---
 
-## 🚀 Key Features (v3.0)
+##  Key Features (v3.0)
 
 * **Face Mesh Analysis:** Build and track 468 facial landmarks via MediaPipe.
 * **Data Encryption (`CryptoManager`):** Biometric templates are never stored in plain JSON. Data is encrypted using PBKDF2 (SHA-256) and dynamic hardware keys.
