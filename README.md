@@ -1,31 +1,32 @@
-Face Lock Pro
 Hey. This is my project on computer vision and biometrics.
 
 I'll be straight with you: I'm not claiming this is a perfect, production-ready FaceID system. I'm learning, experimenting, and digging into the topic. So if you see a hack somewhere, don't be surprised — either I meant it that way, or I haven't figured out a better way yet.
 
 The code is open and free. Take it, break it down, modify it for your needs. The only condition is to credit the author (Terorating) if you use my code or key ideas. It's basic respect for someone else's work.
 
-What it actually does
-This isn't just facial recognition by landmark points. I tried to make it so the system can't be fooled by a regular photo or a video from a phone.
+What it actually does (and what changed)
+I recently did a major rewrite of the core. It's not just a patch — I completely reworked the security and liveness logic. Here is what the current version does:
 
-Face Mesh: Builds 468 points via MediaPipe. That's the basic part.
+Face Mesh: Builds 128 key points via MediaPipe for face comparison.
 
-Anti-photo protection: Checks if you're alive. Blink, smile, turn your head — if you just sit there and don't do the tasks, no access for you. In the code, this is the EAR (eye) check, smile detection, and challenges.
+Liveness Check (Fixed): It actually works now. The system makes you blink (using Eye Aspect Ratio with a proper hysteresis threshold) or smile to prove you're a real person. No more letting photos through.
 
-Moles and scars: Looks for dark spots on the face. Yeah, you could call it paranoia, but it's fun when the system recognizes you by the mole on your cheek.
+Real Encryption: I threw out the old XOR obfuscation. The biometric data is now encrypted with Fernet (AES) and bound to your Windows account using DPAPI. If someone steals the data folder and opens it on another PC, it's just useless garbage.
 
-Lips: Monitors articulation. To keep deepfakes out.
+Distance Normalization: The face comparison no longer breaks if you step closer to or further from the camera. It normalizes distances based on the face width.
 
-Encryption: The face print isn't sitting in a plain JSON. I put some effort into PBKDF2 and AES. The key is tied to the PC's hardware (via system variables), so just copying the data folder to another machine and logging in won't work.
+Brute-force Protection: If someone tries to fake the face 5 times, the system locks them out for 5 minutes.
 
-Blocking: If you turn on block mode, the mouse and keyboard get disabled. But there's a fail-safe timer (Watchdog) so if the app crashes, you're not left with a locked PC forever. 30 seconds — and you're free.
+Blocking: If you turn on block mode, the mouse and keyboard get disabled. But there's a fail-safe timer (Watchdog) so if the app crashes, you're not left with a locked PC forever.
+
+(Note: The mole detection and lip movement features from the old v3.0 are temporarily disabled while I stabilize the core. I plan to bring them back later).
 
 How to run
 Clone the repo:
 git clone https://github.com/Terorating/FaceID-Liveness-Security.git
 
 Install dependencies:
-pip install opencv-python mediapipe numpy cryptography
+pip install opencv-python mediapipe numpy cryptography pywin32
 
 Download the MediaPipe models (face_landmarker.task and hand_landmarker.task) and drop them into the models/ folder.
 
@@ -33,24 +34,20 @@ Run:
 python main.py
 
 Settings
-In config.json you can tweak the camera, thresholds, and timeouts. If you don't know what a parameter does — better not touch it, consider yourself warned.
+In the code, you can tweak the camera, thresholds, and timeouts. If you don't know what a parameter does — better not touch it, consider yourself warned. (I'll move everything to config.json in the next update).
 
 Plans (what I want to finish)
-Right now it's just a demo. But in the future, I want to turn this into something bigger:
+Right now it's a solid core. But in the future, I want to turn this into something bigger:
+
+Bring back the old features: Return mole detection and lip articulation checks.
 
 Voice: Hook up key phrase and timbre recognition.
 
-Multi-factor: Face + Voice + Secret key combination (so it's completely unbreakable).
+Multi-factor: Face + Voice + Secret key combination.
 
 Proper GUI: Move away from the standard OpenCV window to PyQt or CustomTkinter so it looks nice.
 
 Server: Build an admin panel that shows who logged in and when, in real time.
-
-Commercial: Maybe release a paid version with more features once I gain more experience.
-
-Author
-Terorating
-MIT License — do whatever you want, just credit the author.
 
 **Author:** [Terorating](https://github.com/Terorating)  
 **License:** MIT (Free to use with required attribution).
