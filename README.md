@@ -1,108 +1,56 @@
-# Face Lock Pro v3.0
+Face Lock Pro
+Hey. This is my project on computer vision and biometrics.
 
-Biometric authentication system in Python (FaceID + Liveness Check + Anti-Spoofing + Encrypted Data).
+I'll be straight with you: I'm not claiming this is a perfect, production-ready FaceID system. I'm learning, experimenting, and digging into the topic. So if you see a hack somewhere, don't be surprised — either I meant it that way, or I haven't figured out a better way yet.
 
-##  About The Project
+The code is open and free. Take it, break it down, modify it for your needs. The only condition is to credit the author (Terorating) if you use my code or key ideas. It's basic respect for someone else's work.
 
-This project is my practical work for mastering computer vision, biometrics, cybersecurity, and data encryption. 
+What it actually does
+This isn't just facial recognition by landmark points. I tried to make it so the system can't be fooled by a regular photo or a video from a phone.
 
-**To be clear:** I am not claiming this is an ideal or 100% enterprise-ready FaceID system. I am a beginner/learning developer, and my primary goal here is **hands-on practice, experimentation, and deep-diving into the field**.
+Face Mesh: Builds 468 points via MediaPipe. That's the basic part.
 
-The code is completely Open Source and free. Feel free to use, inspect, modify, optimize, or build upon it for your own needs. The only condition is to credit me (**Terorating**) if you use my code or core ideas. This is basic respect for someone else's work.
+Anti-photo protection: Checks if you're alive. Blink, smile, turn your head — if you just sit there and don't do the tasks, no access for you. In the code, this is the EAR (eye) check, smile detection, and challenges.
 
----
+Moles and scars: Looks for dark spots on the face. Yeah, you could call it paranoia, but it's fun when the system recognizes you by the mole on your cheek.
 
-##  Key Features (v3.0)
+Lips: Monitors articulation. To keep deepfakes out.
 
-* **Face Mesh Analysis:** Build and track 468 facial landmarks via MediaPipe.
-* **Data Encryption (`CryptoManager`):** Biometric templates are never stored in plain JSON. Data is encrypted using PBKDF2 (SHA-256) and dynamic hardware keys.
-* **Liveness Detection:** Real-time dynamic validation (Eyelid Aspect Ratio / EAR blinks, smile tracking, head rotation) + interactive challenge-response prompts.
-* **Feature Detection (`MoleDetector`):** Detects and verifies unique facial marks (moles, scars) for extra security.
-* **Lip Movement Analysis (`LipMovementDetector`):** Verifies speech articulation to prevent deepfake and static mask bypasses.
-* **Anti-Spoofing (`AntiSpoofing`):** Replay attack detection via frame hashes + primary gradient density analysis for deepfake detection.
-* **Watchdog Protection (`SafeBlockInput`):** Secure workstation locking with a background watchdog thread that automatically restores input after 30 seconds if the process freezes.
+Encryption: The face print isn't sitting in a plain JSON. I put some effort into PBKDF2 and AES. The key is tied to the PC's hardware (via system variables), so just copying the data folder to another machine and logging in won't work.
 
----
+Blocking: If you turn on block mode, the mouse and keyboard get disabled. But there's a fail-safe timer (Watchdog) so if the app crashes, you're not left with a locked PC forever. 30 seconds — and you're free.
 
-## 📁 Repository Structure
+How to run
+Clone the repo:
+git clone https://github.com/Terorating/FaceID-Liveness-Security.git
 
-```text
-.
-├── main.py                # Main application logic
-├── config.json            # Configuration file
-├── models/                # MediaPipe task models (download separately)
-│   ├── face_landmarker.task
-│   └── hand_landmarker.task
-├── data/                  # Encrypted biometric storage (do not commit)
-└── logs/                  # System logs
-```
+Install dependencies:
+pip install opencv-python mediapipe numpy cryptography
 
----
+Download the MediaPipe models (face_landmarker.task and hand_landmarker.task) and drop them into the models/ folder.
 
-## ⚙️ Configuration Breakdown (`config.json`)
+Run:
+python main.py
 
-All key parameters are exposed in `config.json`:
+Settings
+In config.json you can tweak the camera, thresholds, and timeouts. If you don't know what a parameter does — better not touch it, consider yourself warned.
 
-### 1. `camera`
-* `device_id`: Webcam index (default: `0`).
-* `width` / `height`: Stream resolution (`640x480`).
-* `fps`: Frame rate (`30`).
+Plans (what I want to finish)
+Right now it's just a demo. But in the future, I want to turn this into something bigger:
 
-### 2. `detection`
-* `confidence_threshold`: Minimum confidence score for face detection.
-* `mole_min_area` / `mole_max_area`: Size constraints for mole/scar detection (in pixels).
-* `mole_contrast_threshold`: Contrast threshold to isolate dark skin marks.
-* `mole_match_threshold`: Matching factor required to confirm identity.
-* `lip_movement_threshold`: Sensitivity threshold for lip movement validation.
+Voice: Hook up key phrase and timbre recognition.
 
-### 3. `liveness`
-* `timeout`: Time window (in seconds) allowed for initial liveness verification.
-* `liveness_threshold`: Minimum combined score required to pass liveness check (default: `0.55`).
-* `blink_weight` / `lip_weight` / `mole_weight`: Score multipliers for each validation factor.
-* `challenge_timeout`: Time limit to complete random challenge commands.
+Multi-factor: Face + Voice + Secret key combination (so it's completely unbreakable).
 
-### 4. `security`
-* `block_watchdog_timeout`: Max lock time for `BlockInput`. Guarantees input release if an uncaught exception occurs.
-* `encryption_iterations`: PBKDF2 iteration count for encryption key derivation.
+Proper GUI: Move away from the standard OpenCV window to PyQt or CustomTkinter so it looks nice.
 
----
+Server: Build an admin panel that shows who logged in and when, in real time.
 
-## 🛠 Quick Start
+Commercial: Maybe release a paid version with more features once I gain more experience.
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/Terorating/FaceID-Liveness-Security.git
-   cd FaceID-Liveness-Security
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   pip install opencv-python mediapipe numpy cryptography
-   ```
-
-3. **Download MediaPipe models:**
-   Place the following model files into the `models/` directory:
-   * `face_landmarker.task`
-   * `hand_landmarker.task`
-
-4. **Run the system:**
-   ```python
-   python main.py
-   ```
-
----
-
-## 🗺 Future Roadmap & Ecosystem Plans
-
-This repository is just the beginning. My long-term goal is to build an interconnected ecosystem of security and automation projects:
-
-* [ ] **Voice Initialization & Speaker Recognition:** Adding voice verification, keyword triggers, and speech pattern/defect analysis.
-* [ ] **Multi-Factor Unlock:** Combining FaceID, voice commands, and specific hardware key combinations for maximum security.
-* [ ] **Client-Server Architecture:** Unifying future projects into a single general system where a system administrator (SysAdmin) can monitor login/logout events, activity logs, and system status across multiple machines in real time.
-* [ ] **GUI Migration:** Transitioning from an OpenCV interface to a modern desktop GUI (CustomTkinter / PyQt).
-* [ ] **Commercial Iterations:** Developing advanced, closed-source enterprise modifications based on open-source foundations.
-
----
+Author
+Terorating
+MIT License — do whatever you want, just credit the author.
 
 **Author:** [Terorating](https://github.com/Terorating)  
 **License:** MIT (Free to use with required attribution).
